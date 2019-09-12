@@ -4,34 +4,34 @@ end_state = "|FGCW"
 left_state = ""
 right_state = ""
 invalid_states = ("GW", "CG", "WG", "GW")
-
-moves = []
+visited_states = []
 
 def move_left(move): 
     left_state = move
-    #if is_safe(left_state):  
-    possible_moves = next_moves(left_state)
-    for move in possible_moves: 
-        moves.append(move)
-        move_right(move)
+    for state in possible_moves(left_state): 
+        if state not in visited_states:
+            visited_states.append(left_state + "|" + right_state)
+            print(state)
+            # move_right(move)
     
-
 def move_right(move):
     right_state = move
-    possible_moves = next_moves(right_state)
-    for move in possible_moves: 
-        moves.append(move)
-        move_left(move)
-    return 
-
+    if is_safe(right_state):
+        return True
+    for state in possible_moves(right_state): 
+        if state not in visited_states:
+            visited_states.append(left_state + "|" + right_state)
+            print(state)
+            move_left(move)
+    
 
 # helper function for checking if given state is valid
 def is_safe(side_state, move):
     if side_state not in invalid_states:
-        moves.append(move)
+        visited_states.append(move)
         return True
     else:
-        moves.append(move)
+        visited_states.append(move)
         return False
 
 
@@ -41,17 +41,23 @@ def reached_end_state(state):
     else:
         return False
 
-def next_moves(state):
-    next_moves = ["F"]
-    state.remove("F")
+
+# successor function 
+def possible_moves(state):
+    possible_moves = ["F"]
+    state.replace("F", "")
     if state != "": 
         for prop in state:
-            if prop != "|":
-                next_moves.append("F" + prop)
-
-        return next_moves
+            if prop != "|" and prop != "F":
+                possible_moves.append("F" + prop)
+        return possible_moves
     else: 
-        return next_moves
+        return possible_moves
         
 
 # start state begins on leftside
+move_left(start_state)
+for move in visited_states: 
+    print(move)
+
+# 
