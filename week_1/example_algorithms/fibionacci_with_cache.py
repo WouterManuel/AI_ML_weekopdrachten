@@ -26,7 +26,6 @@ def memorize(f):
     memo = {}
     # definining function wrapper
     def helper(x):
-        print('a')
         if x not in memo:
             memo[x] = f(x)
             print(f(x), " added")
