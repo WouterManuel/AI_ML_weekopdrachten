@@ -29,16 +29,15 @@ def move_actor(move, side, path=[]):
 
             # put together a string representing a new temporary state
             temp_state = ''.join(sorted(possible_move + left_state)) + "|" + ''.join(sorted(temp_right))
-
+            
             # checks if the new temporary found state has not already been visited
             if temp_state not in path:
                 # check if the state of the right side (after making the move) is a safe side
                 if is_safe(temp_right) == False:
                     # add the temp state to "visited" states
                     print("illegal state '{0}': {1}".format(temp_right, temp_state))
-                    path.append(temp_state)
-                    paths.append(path)
-                # else, explore the treated by the valid move
+                    paths.append(path + [temp_state])
+                # explore the valid moves
                 else:
                     newpaths = move_actor(temp_state, "left", path)
                     for newpath in newpaths:
@@ -54,12 +53,10 @@ def move_actor(move, side, path=[]):
 
             # puts together a string representing a new temporary state 
             temp_state = ''.join(sorted(temp_left)) + "|" + ''.join(sorted(possible_move + right_state)) 
-
             if temp_state not in path:
                 if is_safe(temp_left) == False:
                     print("illegal state '{0}': {1}".format(temp_left, temp_state))
-                    path.append(temp_state)
-                    paths.append(path)
+                    paths.append(path + [temp_state])
                 else:
                     newpaths = move_actor(temp_state, "right", path)
                     for newpath in newpaths:
@@ -82,17 +79,15 @@ def goal_state(state):
     else:
         return False
 
+
 # successor function 
 def possible_moves(state, side):
     possible_moves = []
-    if len(state) < 4 and side == "right": 
-        if len(state) >= 2:
-            possible_moves.append("F")
-            return possible_moves
-    else:
+    if "F" in state:
+        possible_moves.append("F") 
         for actor in state:
             if actor != "F":
-                possible_moves.append("F" + actor) 
+                possible_moves.append("F" + actor)
     return possible_moves
 
 
@@ -107,4 +102,5 @@ def state_string_filter(move, num):
 
 # start state begins on leftside
 print(start_state)
-print("final result: {0}".format(move_actor(start_state, "left")))
+for path in move_actor(start_state, "left"):
+    print(path)
