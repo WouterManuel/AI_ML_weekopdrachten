@@ -93,14 +93,12 @@ def possible_moves(state, side):
 
 # helper function that filters out the state of the river side that calls it
 def state_string_filter(move, num):
-    # side_state = move
-    temp_move = move.split("|",1)[num]
-    # if len(temp_move) > 0:
-    #     for actor in temp_move: 
-    #        side_state += actor
-    return temp_move
+    parsed_move = move.split("|",1)[num]
+    return parsed_move
+
 
 # start state begins on leftside
-print(start_state)
+count = 1
 for path in move_actor(start_state, "left"):
-    print(path)
+    print("path {0}: {1}".format(count, path))
+    count += 1
