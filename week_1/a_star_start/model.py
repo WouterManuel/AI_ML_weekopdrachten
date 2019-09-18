@@ -45,7 +45,7 @@ def search(app, start, goal):
         app.plot_line_segment(i, i+1, i+1, i+1, color=cf.FINAL_C)
         app.pause()
 
-# voor de uitwerking van het UCS algoritme is het voorbeeld uit de sheets\
+# voor de uitwerking van het UCS algoritme is het voorbeeld uit de sheets
 # van het hoorcollege 1-2 gebruikt.
 def ucs(app, start, goal): 
     pqueue = PriorityQueue()
@@ -53,6 +53,7 @@ def ucs(app, start, goal):
     visited = set()
     pqueue.put((start,path+[start]), 0)
 
+    # loop through possible paths while the queue 
     while not pqueue.empty():
         cumulative_cost, item = pqueue.get() 
         current_node = item[0]
@@ -60,11 +61,11 @@ def ucs(app, start, goal):
 
         if current_node == goal:
             return path
-
+        
         for neighbour in neighbours(current_node):
             if neighbour not in visited:
-                pqueue.put((neighbour, path+[neighbour]), cumulative_cost+1)
                 visited.add(neighbour)
+                pqueue.put((neighbour, path+[neighbour]), cumulative_cost+1)
                 if neighbour != goal: 
                     app.plot_node(neighbour, color=cf.PATH_C)
                 app.pause()
@@ -79,12 +80,9 @@ def neighbours(node):
     # directions: left, right, up, down
     directions = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
     neighbours = []
-    
     for direction in directions:
-        if out_of_bounds(direction):
-            if not_blocked(direction):
-                neighbours.append(direction)
-
+        if not out_of_bounds(direction) and not_blocked(direction):
+            neighbours.append(direction)
     return neighbours
 
 # helper function that checks if a node is blocked
@@ -99,7 +97,7 @@ def not_blocked(node):
 def out_of_bounds(node):
     # compare coordinates with size of board or if they are smaller than 0
     if node[0] > cf.SIZE-1 or node[1] > cf.SIZE-1 or node[0] < 0 or node[1] < 0:
-        return False
-    else:
         return True
+    else:
+        return False
 

@@ -44,7 +44,7 @@ class MainApp(tk.Frame):
 
     # Raises an error message to the user
     def path_not_found_message(self):
-        messagebox.showinfo("No path available!", "Goal is blocked.")
+        messagebox.showinfo("No path available!", "Path is completely blocked.")
 
     def init_grid(self):
         for x in range(cf.SIZE):
