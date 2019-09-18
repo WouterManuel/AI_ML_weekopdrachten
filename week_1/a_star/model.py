@@ -56,64 +56,65 @@ def ucs(app, start, goal):
     # loop through possible paths while the queue 
     while not pqueue.empty():
         cumulative_cost, item = pqueue.get() 
-        current_node = item[0]
+        current = item[0]
         path = item[1]
 
-        if current_node == goal:
+        if current == goal:
             return path
         
-        for neighbour in neighbours(current_node):
+        for neighbour in neighbours(current):
             if neighbour not in visited:
                 visited.add(neighbour)
                 pqueue.put((neighbour, path+[neighbour]), cumulative_cost+1)
-                if neighbour != goal: 
-                    app.plot_node(neighbour, color=cf.PATH_C)
-                app.pause()
+                app.plot_node(neighbour, color=cf.PATH_C)
+        app.pause()
                 
     app.path_not_found_message()            
     return path
 
+
+# TODO: WERKT NIET OPTIMAAl, WE WETEN OOK NIET PRECIES WAAROM. GRAAG DIT OVERLEGGEN IN VRAGENUURTJE
 def a_star(app, start, goal):
     pqueue = PriorityQueue()
-    path = []
-    visited = set()
-    pqueue.put((start, path+[start], (start, 0)), 0)
+    path = [] # keeps being added onto and will eventually return from function as shortest path
+    visited = {} # keeps track of all visited nodes and their priority values
+    pqueue.put((start, path+[start]), 0)
+    visited[start] = 0
 
-    # loop through possible paths while the queue 
+    # loop through possible paths while the queue is not empty
     while not pqueue.empty():
-        cumulative_cost, item = pqueue.get() 
-        current_node = item[0]
+        prev_cost, item = pqueue.get() 
+        current = item[0]
         path = item[1]
-        # prev_node = item[2][0]
-        prev_cost = item[2][1]
+        print("current path {0} with priority {1}".format(current, prev_cost))
 
-        if current_node == goal:
+        if current == goal:
             return path
         
-        if current_node not in visited and prev_cost > cumulative_cost+1:
-            return 
-
-        for neighbour in neighbours(current_node):
-            if neighbour not in visited:
-                visited.add(neighbour)
-                g = cumulative_cost + 1
+        for neighbour in neighbours(current):
+                g = prev_cost - 1
                 h = cost(neighbour, goal) # heuristic
-                pqueue.put((neighbour, path+[neighbour], (current_node, (h*3)+(g*2))), (h*3)+(g*2))
-                if neighbour != goal: 
+                p = g - h # priority = g + h
+                # or (neighbour in visited and not visited[neighbour] > visited[current])
+                if neighbour not in visited:
+                    visited[neighbour] = p # neighbour has now been visited
+                    print("     p for neighbour {0} is {1}".format(neighbour, p*(-1)))
+                    pqueue.put((neighbour, path+[neighbour]), p*(-1)) # add neighbour to queue
                     app.plot_node(neighbour, color=cf.PATH_C)
-
-                app.pause()
-                
+                    app.pause() # pause loop according to set delay
+    
     app.path_not_found_message()            
     return path
 
 # calculates cost based on heuristic
 # source for chosen heuristic: https://www.kdnuggets.com/2017/08/comparing-distance-measurements-python-scipy.html
 def cost(n1, n2):
-    x1, y1 = n1[0], n1[1]
+    x1 = n1[0]
+    y1 = n1[1]
     x2 = n2[0]
     y2 = n2[1]
-    return (abs(x2-x1)**2 + abs(y2-y1)**2)**0.5 # Manhattan distance: "the distance between two points is the sum of the absolute differences of their Cartesian coordinates."
+    # Euclidian distance. allows for diagonal measurement of distance
+    return math.sqrt(abs((x2-x1)**2) + abs((y2-y1)**2))
 
 # helper function that checks all possible neighbours for a given node
 def neighbours(node):

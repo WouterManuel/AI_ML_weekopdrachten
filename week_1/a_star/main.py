@@ -1,8 +1,8 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
 import model as mo
 import config as cf
+from tkinter import ttk
+from tkinter import messagebox
 
 # global var
 START_FLAG = True # not redraw grid when pressing start first time
