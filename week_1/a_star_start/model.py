@@ -77,38 +77,43 @@ def a_star(app, start, goal):
     pqueue = PriorityQueue()
     path = []
     visited = set()
-    pqueue.put((start,path+[start]), 0)
+    pqueue.put((start, path+[start], (start, 0)), 0)
 
     # loop through possible paths while the queue 
     while not pqueue.empty():
         cumulative_cost, item = pqueue.get() 
         current_node = item[0]
         path = item[1]
+        # prev_node = item[2][0]
+        prev_cost = item[2][1]
 
         if current_node == goal:
             return path
         
+        if current_node not in visited and prev_cost > cumulative_cost+1:
+            return 
+
         for neighbour in neighbours(current_node):
             if neighbour not in visited:
                 visited.add(neighbour)
                 g = cumulative_cost + 1
-                h = cost(neighbour, goal)
-                pqueue.put((neighbour, path+[neighbour]), h+g)
-
+                h = cost(neighbour, goal) # heuristic
+                pqueue.put((neighbour, path+[neighbour], (current_node, (h*3)+(g*2))), (h*3)+(g*2))
                 if neighbour != goal: 
                     app.plot_node(neighbour, color=cf.PATH_C)
-                    
+
                 app.pause()
                 
     app.path_not_found_message()            
     return path
 
+# calculates cost based on heuristic
+# source for chosen heuristic: https://www.kdnuggets.com/2017/08/comparing-distance-measurements-python-scipy.html
 def cost(n1, n2):
-    x1 = n1[0] 
-    y1 = n1[1]
+    x1, y1 = n1[0], n1[1]
     x2 = n2[0]
     y2 = n2[1]
-    return abs(x2-x1) + abs(y2-y1)
+    return (abs(x2-x1)**2 + abs(y2-y1)**2)**0.5 # Manhattan distance: "the distance between two points is the sum of the absolute differences of their Cartesian coordinates."
 
 # helper function that checks all possible neighbours for a given node
 def neighbours(node):

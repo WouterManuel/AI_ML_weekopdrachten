@@ -1,0 +1,7 @@
+Opdracht 1: River Crossing Problem
+-	De tijd complexiteit voor onze uitwerking van het river crossing probleem is O(n^2).
+	Dit komt vanwege de nested for-loop in de hoofdfunctie move_actor(). 
+
+Opdracht 2: Boggle
+-	De tijd complexiteit voor onze uitwerking van het river crossing probleem is O(n^2).
+	Dit komt ook vanwege een nested for-loop in de hoofdfunctie find_words(). 
