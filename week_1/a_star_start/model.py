@@ -74,8 +74,42 @@ def ucs(app, start, goal):
     return path
 
 def a_star(app, start, goal):
-    return 0
-    
+    pqueue = PriorityQueue()
+    path = []
+    visited = set()
+    pqueue.put((start,path+[start]), 0)
+
+    # loop through possible paths while the queue 
+    while not pqueue.empty():
+        cumulative_cost, item = pqueue.get() 
+        current_node = item[0]
+        path = item[1]
+
+        if current_node == goal:
+            return path
+        
+        for neighbour in neighbours(current_node):
+            if neighbour not in visited:
+                visited.add(neighbour)
+                g = cumulative_cost + 1
+                h = cost(neighbour, goal)
+                pqueue.put((neighbour, path+[neighbour]), h+g)
+
+                if neighbour != goal: 
+                    app.plot_node(neighbour, color=cf.PATH_C)
+                    
+                app.pause()
+                
+    app.path_not_found_message()            
+    return path
+
+def cost(n1, n2):
+    x1 = n1[0] 
+    y1 = n1[1]
+    x2 = n2[0]
+    y2 = n2[1]
+    return abs(x2-x1) + abs(y2-y1)
+
 # helper function that checks all possible neighbours for a given node
 def neighbours(node):
     x = node[0]
