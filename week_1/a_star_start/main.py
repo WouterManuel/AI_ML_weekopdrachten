@@ -88,7 +88,10 @@ class MainApp(tk.Frame):
             if not START_FLAG:
                 self.re_plot()
             START_FLAG = False
-            self.draw_path(mo.ucs(self, cf.START, cf.GOAL))
+            if self.alg.get() == "UCS":
+                self.draw_path(mo.ucs(self, cf.START, cf.GOAL))
+            elif self.alg.get() == "A*":
+                self.draw_path(mo.a_star(self, cf.START, cf.GOAL))
 
         start_button = tk.Button(lf1, text="Start", command=start_search, width=10)
         start_button.grid(row=1, column=1, sticky='w', padx=5, pady=5)
@@ -98,11 +101,11 @@ class MainApp(tk.Frame):
             print('algorithm =', self.alg.get())
         
         # create a single radio button and bind it to variable and command
-        r1_button = tk.Radiobutton(lf1, text='UC', variable=self.alg, value='UC', command=select_alg)
+        r1_button = tk.Radiobutton(lf1, text='UCS', variable=self.alg, value='UCS', command=select_alg)
         r1_button.grid(column=1, row=3, columnspan=2, sticky='w')
         r2_button = tk.Radiobutton(lf1, text='A*', variable=self.alg, value='A*', command=select_alg)
         r2_button.grid(column=1, row=4, columnspan=2, sticky='w')
-        self.alg.set('UC')
+        self.alg.set('UCS')
 
         def box_update1(event):
             # print selected delay
@@ -151,7 +154,7 @@ class MainApp(tk.Frame):
 
 # create and start GUI
 root = tk.Tk()
-root.title('A* demo')
+root.title('UCS en A* demo')
 
 app = MainApp(root)
 root.mainloop()

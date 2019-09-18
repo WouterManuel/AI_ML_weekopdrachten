@@ -72,6 +72,9 @@ def ucs(app, start, goal):
                 
     app.path_not_found_message()            
     return path
+
+def a_star(app, start, goal):
+    return 0
     
 # helper function that checks all possible neighbours for a given node
 def neighbours(node):
