@@ -25,7 +25,7 @@ class PriorityQueue:
     # pop returns the smallest item from the heap
     # i.e. the root element = element (priority, item) with highest priority
     def get(self):
-        return heapq.heappop(self.elements)
+        return heapq.heappop(self.elements)[1]
 
 def bernoulli_trial(app):
     return 1 if random.random() < int(app.prob.get())/10 else 0
@@ -83,23 +83,25 @@ def a_star(app, start, goal):
 
     # loop through possible paths while the queue is not empty
     while not pqueue.empty():
-        prev_cost, item = pqueue.get() 
-        current = item[0]
+        item = pqueue.get() 
+        parent = item[0]
         path = item[1]
+        prev_cost = visited[parent]
+        current = path[-1] 
         print("current path {0} with priority {1}".format(current, prev_cost))
 
         if current == goal:
             return path
         
         for neighbour in neighbours(current):
-                g = prev_cost - 1
+                g = prev_cost + 1
                 h = cost(neighbour, goal) # heuristic
-                p = g - h # priority = g + h
+                p = g + h # priority = g + h
                 # or (neighbour in visited and not visited[neighbour] > visited[current])
-                if neighbour not in visited:
-                    visited[neighbour] = p # neighbour has now been visited
-                    print("     p for neighbour {0} is {1}".format(neighbour, p*(-1)))
-                    pqueue.put((neighbour, path+[neighbour]), p*(-1)) # add neighbour to queue
+                if neighbour not in visited or g < prev_cost:
+                    visited[neighbour] = g # neighbour has now been visited
+                    print("     p for neighbour {0} is {1}".format(neighbour, p))
+                    pqueue.put((current, path+[neighbour]), p) # add neighbour to queue
                     app.plot_node(neighbour, color=cf.PATH_C)
                     app.pause() # pause loop according to set delay
     
