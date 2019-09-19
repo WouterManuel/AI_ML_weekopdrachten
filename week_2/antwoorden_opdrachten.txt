@@ -1,0 +1,6 @@
+1a. Hoeveel procent ligt het resultaat van NN af van de optimale route?
+    Het resultaat van onze implementatie van NN is bij een seed waarde van 1000  
+    = ((2643,7-2403,1)/2403.1)*100 = 10,012%
+1b. Hoe lang doet het NN-programma over een route met 500 steden en wat is de totale lengte van de route?
+    Bij een seed van 1000 duurt 0.089 secs en is de lengte 21059.7
+1c. 
