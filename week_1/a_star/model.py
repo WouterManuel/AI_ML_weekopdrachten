@@ -50,22 +50,26 @@ def search(app, start, goal):
 def ucs(app, start, goal): 
     pqueue = PriorityQueue()
     path = []
-    visited = set()
+    visited = {}
+    visited[start] = 0
     pqueue.put((start,path+[start]), 0)
 
     # loop through possible paths while the queue 
     while not pqueue.empty():
-        cumulative_cost, item = pqueue.get() 
-        current = item[0]
+        item = pqueue.get() 
+        prev_node = item[0]
+        prev_cost = visited[prev_node]
         path = item[1]
+        current = path[-1]
 
         if current == goal:
             return path
         
         for neighbour in neighbours(current):
+            cost = prev_cost + 1
             if neighbour not in visited:
-                visited.add(neighbour)
-                pqueue.put((neighbour, path+[neighbour]), cumulative_cost+1)
+                visited[neighbour] = cost
+                pqueue.put((current, path+[neighbour]), cost)
                 app.plot_node(neighbour, color=cf.PATH_C)
         app.pause()
                 
@@ -99,7 +103,7 @@ def a_star(app, start, goal):
                 p = g + h # priority = g + h
                 # or (neighbour in visited and not visited[neighbour] > visited[current])
                 if neighbour not in visited or g < prev_cost:
-                    visited[neighbour] = g # neighbour has now been visited
+                    visited[neighbour] = g # node has now been visited
                     print("     p for neighbour {0} is {1}".format(neighbour, p))
                     pqueue.put((current, path+[neighbour]), p) # add neighbour to queue
                     app.plot_node(neighbour, color=cf.PATH_C)
