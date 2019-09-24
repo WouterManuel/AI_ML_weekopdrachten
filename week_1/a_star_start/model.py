@@ -89,17 +89,15 @@ def a_star(app, start, goal):
             return path
         
         for neighbour in neighbours(current_node):
+            print("neighbours of : {0} are : {1}.".format(current_node, neighbour))
             if neighbour not in visited:
                 visited.add(neighbour)
-                g = cumulative_cost + 1
+                g = cumulative_cost +1
                 h = cost(neighbour, goal)
                 pqueue.put((neighbour, path+[neighbour]), h+g)
-
                 if neighbour != goal: 
-                    app.plot_node(neighbour, color=cf.PATH_C)
-                    
+                    app.plot_node(neighbour, color=cf.PATH_C) 
                 app.pause()
-                
     app.path_not_found_message()            
     return path
 
