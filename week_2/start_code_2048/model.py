@@ -166,6 +166,12 @@ def expectimax(b, direction, turn, depth=0):
     moves = get_valid_moves(b)
     score = 0
 
+    # TODO evaluate game state: WIN or LOSE
+    if game_state(b) == 'win':
+        return 100 
+    else:
+        return 0    
+
     # base case
     if depth == MAX_DEPTH: # als we klaar zijn, return de hoogste waarde in de meegegeven dictionary
         score = (max_value(b) + upper_left(b)) * empty_spaces(b)
@@ -180,18 +186,18 @@ def expectimax(b, direction, turn, depth=0):
             # print("mv for {0} is {1}".format(func, mv))
             # print("Direction values : {0}".format(direction_values))
             score += expectimax(new_board, move, False, depth + 1)
-        
         return score
     
     # TODO: Evaluate expected value by summing up all scores for the next possible moves 
     # and divide them by the amount of moves possible
     else: 
-        average = 0
+        chance = 0
         for move in moves:
-            new_board = MERGE_FUNCTIONS[move](b)
-            new_board = add_two_four(b)
-            average += expectimax(new_board, move, True, depth + 1)
-        return average / len(moves)
+            # new_board = MERGE_FUNCTIONS[move](b) # make new board based on possible move
+            new_board = add_two_four(b) # add random element to board TODO - percentage of possibility or just add a random tile?
+            # check chance 0.10 and 0.90 for a 4 or 2 (board states) 
+            chance += expectimax(new_board, move, True, depth + 1) # cumulative value of all possible scores
+        return chance / len(moves) # return calculated average
 
 
 def get_expectimax_move(b):
@@ -207,10 +213,11 @@ def get_expectimax_move(b):
 
 # heuristic to give the upper left corner the highest priority
 def upper_left(b):
-    weight = [[0.4, 0.3, 0.2, 0.0],
-            [0.3, 0.3, 0.0, 0.0],
-            [0.2, 0.0, 0.0, 0.0],
-            [0.0, 0.0, 0.0, 0.0]]
+    weight =    [[0.4, 0.3, 0.2, 0.0],
+                [0.3, 0.3, 0.0, 0.0],
+                [0.2, 0.0, 0.0, 0.0],
+                [0.0, 0.0, 0.0, 0.0]]
+                
     total_value = 0
     for x in range(4):
         for y in range(4):
