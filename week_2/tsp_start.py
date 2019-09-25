@@ -33,7 +33,7 @@ def tour_length(tour):
 def make_cities(n, width=1000, height=1000):
     # make a set of n cities, each with random coordinates within a rectangle (width x height).
 
-    random.seed(500) # the current system time is used as a seed
+    random.seed(10) # the current system time is used as a seed
                   # note: if we use the same seed, we get the same set of cities
 
     return frozenset(City(random.randrange(width), random.randrange(height))
@@ -79,12 +79,14 @@ def nearest_neighbor(cities):
                     shortest_dist = new_dist # shortest distance is now new found distance
                     fastest_node = node # and neighbor is now the fastest_node 
             new_line = (route[-1], fastest_node) # new line is drawn between last visited node and new found node
-            # cnt_intersections += intersecting_with_path(route, new_line) # if new line is intersecting with existing path
+            if intersecting_with_path(route, new_line): # if new line is intersecting with existing path
+                cnt_intersections += 1
             current = fastest_node # set current city to the nearest city
         else:   # if there is only one vertex left, it will connect to the starting point of our path
             # route.append(fastest_node) # add it to path sequence
             new_line = (fastest_node, route[0]) # new line is now drawn between last vertex and starting vertex
-            # cnt_intersections += intersecting_with_path(route, new_line) # check if new line is intersecting with existing path
+            if intersecting_with_path(route, new_line): # if new line is intersecting with existing path
+                cnt_intersections += 1
 
         route.append(fastest_node) # add it to path sequence
         unvisited.remove(fastest_node) # remove it from unvisited
@@ -103,12 +105,14 @@ def two_opt(cities):
     route.append(route[0])
     best_route = route
     dist = tour_length(best_route)
-    for i in range(0, len(route)-2): # index for line in route 
+    for i in range(0, len(route)-3): # index for line in route 
         for j in range(i+2, len(route)-1): # index for all other lines in route
             new_route = best_route[:] # best route 
-            if is_intersection((best_route[i], best_route[i+1]), (best_route[j], best_route[j+1])):
-                new_route[i+1:j+1] = best_route[j:i:-1] # swap edges in new route  
-                new_dist = tour_length(new_route)
+            seg1 = (best_route[i], best_route[i+1])
+            seg2 = (best_route[j], best_route[j+1])
+            if is_intersection(seg1, seg2): # check if lines intersect
+                new_route[i+1:j+1] = best_route[j:i:-1] # REVERSE edges in path of both lines ( from seg1 p2 to )
+                new_dist = tour_length(new_route) # new distance is length of new route
                 if new_dist < dist: # check if new route is shorter than shortest route so far
                     best_route = new_route # shortest route is now new route
                     dist = new_dist
@@ -139,30 +143,28 @@ def is_intersection(line_1, line_2):
     # check orientation of two lines (p1, q1, p2), (p1, q1, q2) 
     # and  (p2, q2, p1), (p2, q2, q1) are different
     # if so, there is an intersection 
-    o1 = orientation(p1, q1, p2) 
-    o2 = orientation(p1, q1, q2)
-    o3 = orientation(p2, q2, p1)
-    o4 = orientation(p2, q2, q1)
+    o1 = calc_orientation(p1, q1, p2) 
+    o2 = calc_orientation(p1, q1, q2)
+    o3 = calc_orientation(p2, q2, p1)
+    o4 = calc_orientation(p2, q2, q1)
 
     # General case 
     if o1 != o2 and o3 != o4: 
         return True
-  
+
     return False
 
 # source for deciding orientation: https://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
-def orientation(p1, p2, r):
+def calc_orientation(p1, p2, r):
     # calculate orientation of points
     o = (p2.y - p1.y) * (r.x - p2.x) - (r.y - p2.y) * (p2.x - p1.x)
 
-    # is it colinear?
     if o == 0: 
         return 0
-    # clock or counterclock wise  
     if o > 0:
         return 1
     else: 
         return 2
 
-plot_tsp(nearest_neighbor, make_cities(100))
+plot_tsp(nearest_neighbor, make_cities(500))
 plot_tsp(two_opt, make_cities(500))
