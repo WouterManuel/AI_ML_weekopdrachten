@@ -3,4 +3,17 @@
     = ((2643,7-2403,1)/2403.1)*100 = 10,012%
 1b. Hoe lang doet het NN-programma over een route met 500 steden en wat is de totale lengte van de route?
     Bij een seed van 1000 duurt 0.089 secs en is de lengte 21059.7
-1c. 
+1c. -	Om te bepalen of een route kruist kijkt berekend ons algoritme voor elke nieuwe lijn die wordt gevonden op basis 
+    	van de nodes die nog niet bezocht zijn. Voor de nieuwe lijn wordt voor elke lijn die al bestaat (het korste pad op dat moment)\
+    	gekeken wat de orientatie is van de nieuwelijn en lijn N. De orientatie wordt bepaalt op basis van drie punten: de 2 punten uit lijn
+    	A en een punt 1 uit lijn B, vervolgens wordt een nieuwe orientatie berekend waarbij weer beide punten uit lijn 1 worden gebruikt
+    	maar als derde punt, punt 2 uit lijn B. Vervolgens wordt hetzelfde gedaan, maar dit keer andersom. Er worden in het totaal 4 orientaties berekend. 
+    	De eerste twee orientaties worden met elkaar vergeleken en de laatste twee met elkaar. Wanneer de eerste twee orientaties niet aan elkaar gelijk zijn EN 
+    	de laatste twee orientaties niet aan elkaar gelijk zijn, dan is er sprake van een intersectie. 
+    -	Nee. Wanneer kruisingen worden verwijderd in een graaf zal de lengte van de route niet langer worden.
+	Wanneer wij de ons algoritme vergelijken met try_all_tours met paden die door ons algoritme kruisingen veroorzaken,
+	dan vind try_all_tours alsnog de korste route zonder kruisingen.
+1.d Het verschil bij 500 steden ligt bij ons rond 4.3%
+1.e Ons algoritme is traag en heeft een tijdcomplexiteit van O(n^2)
+
+	
