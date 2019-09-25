@@ -104,18 +104,18 @@ def two_opt(cities):
     route = nearest_neighbor(cities)
     route.append(route[0])
     best_route = route
-    dist = tour_length(best_route)
-    for i in range(0, len(route)-3): # index for line in route 
-        for j in range(i+2, len(route)-1): # index for all other lines in route
-            new_route = best_route[:] # best route 
-            seg1 = (best_route[i], best_route[i+1])
-            seg2 = (best_route[j], best_route[j+1])
-            if is_intersection(seg1, seg2): # check if lines intersect
-                new_route[i+1:j+1] = best_route[j:i:-1] # REVERSE edges in path of both lines ( from seg1 p2 to )
-                new_dist = tour_length(new_route) # new distance is length of new route
-                if new_dist < dist: # check if new route is shorter than shortest route so far
+    changed = True
+    while changed:
+        changed = False
+        for i in range(0, len(route)-3): # index for line in route 
+            for j in range(i+2, len(route)-1): # index for all other lines in route
+                new_route = best_route[:] # best route 
+                seg1 = (best_route[i], best_route[i+1])
+                seg2 = (best_route[j], best_route[j+1])
+                if is_intersection(seg1, seg2): # check if lines intersect
+                    new_route[i+1:j+1] = best_route[j:i:-1] # REVERSE edges in path of both lines ( from seg1 p2 to )
                     best_route = new_route # shortest route is now new route
-                    dist = new_dist
+                    changed = True
     return best_route
 
 # function to check for intesections with a given path
