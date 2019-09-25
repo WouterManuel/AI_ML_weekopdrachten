@@ -1,15 +1,13 @@
+import random
+
 """
-
 Othello is a turn-based two-player strategy board game.
-
 -----------------------------------------------------------------------------
 Board representation
-
 We represent the board as a 100-element list, which includes each square on
 the board as well as the outside edge. Each consecutive sublist of ten
 elements represents a single row, and each list element stores a piece. 
 An initial board contains four pieces in the center:
-
     ? ? ? ? ? ? ? ? ? ?
     ? . . . . . . . . ?
     ? . . . . . . . . ?
@@ -20,9 +18,7 @@ An initial board contains four pieces in the center:
     ? . . . . . . . . ?
     ? . . . . . . . . ?
     ? ? ? ? ? ? ? ? ? ?
-
 This representation has two useful properties:
-
 1. Square (m,n) can be accessed as `board[mn]`. This is because size of square is 10x10,
    and mn means m*10 + n. This avoids conversion between square locations and list indexes.
 2. Operations involving bounds checking are slightly simpler.
@@ -40,6 +36,7 @@ UP_RIGHT, DOWN_RIGHT, DOWN_LEFT, UP_LEFT = -9, 11, 9, -11
 
 # 8 directions; note UP_LEFT = -11, we can repeat this from row to row
 DIRECTIONS = (UP, UP_RIGHT, RIGHT, DOWN_RIGHT, DOWN, DOWN_LEFT, LEFT, UP_LEFT)
+MAX_DEPTH = 4
 
 def squares():
     # list all the valid squares on the board.
@@ -68,6 +65,7 @@ def print_board(board):
         begin, end = 10*row + 1, 10*row + 9
         rep += '%d %s\n' % (row, ' '.join(board[begin:end]))
     return rep
+
 
 # -----------------------------------------------------------------------------
 # Playing the game
@@ -105,6 +103,9 @@ def is_legal(move, player, board):
     # is this a legal move for the player?
     # move must be an empty square and there has to be is an occupied line in some direction
     # any(iterable) : Return True if any element of the iterable is true
+    # print("Move: {0}".format(move))
+    # print("Player: {0}".format(player))
+    # print("Board: {0}".format(print_board(board)))
     hasbracket = lambda direction: find_bracket(move, player, board, direction)
     return board[move] == EMPTY and any(hasbracket(x) for x in DIRECTIONS)
 
@@ -151,6 +152,8 @@ def legal_moves(player, board):
 
 def any_legal_move(player, board):
     # can player make any moves?
+    # print("anylegalmove player: {0}".format(player))
+    # print("AnyLegaMove board: {0}".format(print_board(board)))
     return any(is_legal(sq, player, board) for sq in squares())
 
 # Putting it all together
@@ -162,15 +165,106 @@ def any_legal_move(player, board):
 
 def play(black_strategy, white_strategy):
     # play a game of Othello and return the final board and score
+    board = initial_board()
+    current_player = WHITE
+    move = get_move(white_strategy, current_player, board)
+    board = make_move(move, current_player, board)
+    print(print_board(board))
+    print("next player: {0}".format(next_player(board, current_player)))
+    while next_player(board, current_player):
+        # print("while")
+        current_player = next_player(board, current_player)
+        if current_player == WHITE:
+            move = get_move(white_strategy, current_player, board)
+        else:
+            move = get_move(black_strategy, current_player, board)
+        board = make_move(move, current_player, board)
+        print(print_board(board))
+    # who won?
+    black_score = score(BLACK, board)
+    white_score = score(WHITE, board)
+    print("Black score:{0}".format(black_score))
+    print("White score:{0}".format(white_score))
+    if black_score > white_score:
+        print("Black won!")
+    elif white_score > black_score:
+        print("White won!")
+    
+def is_final_state(board):
+    # return false
+    return (not any_legal_move("@", board) and (not(any_legal_move("o", board))))
 
 def next_player(board, prev_player):
     # which player should move next?  Returns None if no legal moves exist
+    next = opponent(prev_player)
+    if any_legal_move(next, board):
+        return next
+    else:
+        print("no more moves left for player {0}".format(next))
+        return None
 
 def get_move(strategy, player, board):
+    return strategy(player, board)
     # call strategy(player, board) to get a move
 
 def score(player, board):
     # compute player's score (number of player's pieces minus opponent's)
+    score = 0
+    for i in squares():
+        if(board[i] == player):
+            score += 1
+    return score
+
+def get_all_nodes_for_player(board, player):
+    nodes = []
+    coordinates = 0
+    print(print_board(board))
+    for node in board:
+        coordinates +=1
+        if node == player:
+            print("Node: {0}".format(node))
+            print("Player: {0}".format(player))
+            nodes.append(board[coordinates])
+    print(nodes)
+    return nodes
+
+def negamax(board, player, depth, alpha, beta):
+    if depth == MAX_DEPTH or is_final_state(board):
+        print("getallnodes : {0}".format(len(get_all_nodes_for_player(board, player))))
+        # return value
+        # hier moeten we een value returnen waar de recursive negamax op checkt. 
+
+    child_nodes = legal_moves(player, board)
+    if len(child_nodes) == 0:
+        child_nodes = set([None])
+
+    value = -1000
+    for move in child_nodes:
+        value = max(value, -negamax(make_move(move, player, board), opponent(player), depth +1, -beta, -alpha))
+        alpha = max(alpha, value)
+        # print("alpha: {0}".format(alpha))
+        # print("beta: {0}".format(beta))
+        if alpha >= beta:
+            break
+    return value
+
+
 
 # Play strategies
+def random_strat(player, board):
+    # valid moves ophalen
+    moves = legal_moves(player, board)
+    print(moves)
+    move = random.choice(moves)
+    print("chose move : {0}".format(move))
+    return move
 
+def algo(player, board):
+    moves = legal_moves(player, board)
+    print(moves)
+    move = negamax(board, player, 0, -1000, 1000)
+    print("Best move is : {0}".format(move))
+    return move
+
+# play(algo, algo)
+play(algo, random_strat)
