@@ -155,92 +155,82 @@ def test():
 def get_random_move():
     return random.choice(list(MERGE_FUNCTIONS.keys()))
 
-def get_valid_moves(b): 
-    possible_moves = []
-    for func in MERGE_FUNCTIONS.keys():
-        if move_exists(MERGE_FUNCTIONS[func](b)):
-            possible_moves.append(func)
-    return possible_moves
-
-def expectimax(b, direction, turn, depth=0):
-    moves = get_valid_moves(b)
-    score = 0
-
-    # TODO evaluate game state: WIN or LOSE
+def expectimax(b, turn, depth=0):
+    alpha = 0
+    
     if game_state(b) == 'win':
-        return 100 
-    else:
-        return 0    
+        return 999999
 
-    # base case
-    if depth == MAX_DEPTH: # als we klaar zijn, return de hoogste waarde in de meegegeven dictionary
-        score = (max_value(b) + upper_left(b)) * empty_spaces(b)
-        return score
+    # base case: return heuristic value of node
+    if depth == MAX_DEPTH:
+        alpha += (max_value(b) + upper_left(b)) * empty_spaces(b)  
+        return alpha
+
+    if not move_exists(b):
+        return 0
 
     if turn == True:
-        # print(direction_values)
-        for move in moves:
-            new_board = MERGE_FUNCTIONS[move](b)
-            # print("ul for {0} is {1}".format(func, ul))
-            # print("es for {0} is {1}".format(func, es))
-            # print("mv for {0} is {1}".format(func, mv))
-            # print("Direction values : {0}".format(direction_values))
-            score += expectimax(new_board, move, False, depth + 1)
-        return score
-    
-    # TODO: Evaluate expected value by summing up all scores for the next possible moves 
-    # and divide them by the amount of moves possible
-    else: 
-        chance = 0
-        for move in moves:
-            # new_board = MERGE_FUNCTIONS[move](b) # make new board based on possible move
-            new_board = add_two_four(b) # add random element to board TODO - percentage of possibility or just add a random tile?
-            # check chance 0.10 and 0.90 for a 4 or 2 (board states) 
-            chance += expectimax(new_board, move, True, depth + 1) # cumulative value of all possible scores
-        return chance / len(moves) # return calculated average
+        for move in MERGE_FUNCTIONS.keys():
+            alpha += max(alpha, expectimax(MERGE_FUNCTIONS[move](b), False, depth + 1))
+        return alpha
 
+    else: 
+        # used to map all zeros in the given board
+        zeros = [(i,j) for i , j in itertools.product(range(4), range(4)) if b[i][j] == 0]
+        # for every zero on zeros
+        for i, j in zeros:
+            # generate two baord based on the position of a mapped zero in a given board
+            b1 = [x[:] for x in b]
+            b2 = [x[:] for x in b]
+            # for every mapped zero lace either a 2 or a 4 in this position
+            b1[i][j] = 2
+            b2[i][j] = 4
+            
+            # for the newly made boards sum up the scores of them, taking their expectancy into account
+            alpha += (.9 * expectimax(b1, True, depth + 1) / len(zeros)) + (.1 * expectimax(b2, True, depth + 1) / len(zeros))
+        
+        return alpha # return calculated average
 
 def get_expectimax_move(b):
     direction_values = {'left': 0, 'right': 0, 'up': 0, 'down': 0}
-    print(direction_values)
-    # for x in range(4):
-    #     print(b[x])
     for direction in direction_values.keys():
-        direction_values[direction] = expectimax(b, direction, True, 0)
-
-    return max(direction_values.keys(), key=lambda k: direction_values[k])
+        direction_values[direction] = expectimax(MERGE_FUNCTIONS[direction](b), False, 0)
+    print(direction_values)
+    # return the direction with the highest score
+    print(max(direction_values.keys(), key=lambda k: direction_values[k]))
+    return max(direction_values.keys(), key=lambda k: direction_values[k]) 
 
 
 # heuristic to give the upper left corner the highest priority
 def upper_left(b):
-    weight =    [[0.4, 0.3, 0.2, 0.0],
-                [0.3, 0.3, 0.0, 0.0],
-                [0.2, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, 0.0]]
-                
+    weight =    [   [0.4, 0.4, 0.2, 0.099937],
+                    [0.4, 0.4, 0.076711, 0.0724143],
+                    [0.2, 0.0562579, 0.037116, 0.0161889],
+                    [0.0125498, 0.00992495, 0.00575871, 0.00335193]]
+
     total_value = 0
     for x in range(4):
         for y in range(4):
             total_value += b[x][y] * weight[x][y]
-
     return total_value
 
 
-# heuristic to give the upper left corner the highest priority
+# heuristic to give the upper left corner the highest priority for biggest value on board
 def empty_spaces(b):
     number_of_empty_spaces = 0
     for x in range(4):
         for y in range(4): 
             if b[x][y] == 0:
                 number_of_empty_spaces += 1
-
     return number_of_empty_spaces
 
-
+# heuristic to give boards with highest numbers on boards the biggest priority
 def max_value(b):
     max_value = 0
     for x in range(4):
         for y in range(4): 
-            if b[x][y] >= max_value:
+            if b[x][y] > max_value:
+                # if b[x][y] == max_value:
+                #     max_value += b[x][y]
                 max_value = b[x][y]
     return max_value
