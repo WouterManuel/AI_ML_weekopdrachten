@@ -1,0 +1,2 @@
+de opdracht werkt nog niet naar behoren. de eerste move uit de lijst get_moves wordt altijd gekozen. Het is ons niet duidelijk geworden waarom.
+Pruning is wel toegevoegd. het negamax werkt dus helaas niet goed.

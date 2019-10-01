@@ -1,4 +1,7 @@
 import random
+import copy
+import operator
+import timeit
 
 """
 Othello is a turn-based two-player strategy board game.
@@ -36,7 +39,7 @@ UP_RIGHT, DOWN_RIGHT, DOWN_LEFT, UP_LEFT = -9, 11, 9, -11
 
 # 8 directions; note UP_LEFT = -11, we can repeat this from row to row
 DIRECTIONS = (UP, UP_RIGHT, RIGHT, DOWN_RIGHT, DOWN, DOWN_LEFT, LEFT, UP_LEFT)
-MAX_DEPTH = 4
+MAX_DEPTH = 8
 
 def squares():
     # list all the valid squares on the board.
@@ -103,9 +106,6 @@ def is_legal(move, player, board):
     # is this a legal move for the player?
     # move must be an empty square and there has to be is an occupied line in some direction
     # any(iterable) : Return True if any element of the iterable is true
-    # print("Move: {0}".format(move))
-    # print("Player: {0}".format(player))
-    # print("Board: {0}".format(print_board(board)))
     hasbracket = lambda direction: find_bracket(move, player, board, direction)
     return board[move] == EMPTY and any(hasbracket(x) for x in DIRECTIONS)
 
@@ -116,10 +116,11 @@ def is_legal(move, player, board):
 def make_move(move, player, board):
     # update the board to reflect the move by the specified player
     # assuming now that the move is valid
-    board[move] = player
-    # look for a bracket in any direction
-    for d in DIRECTIONS:
-        make_flips(move, player, board, d)
+    if move != None:
+        board[move] = player
+        # look for a bracket in any direction
+        for d in DIRECTIONS:
+            make_flips(move, player, board, d)
     return board
 
 def make_flips(move, player, board, direction):
@@ -152,8 +153,6 @@ def legal_moves(player, board):
 
 def any_legal_move(player, board):
     # can player make any moves?
-    # print("anylegalmove player: {0}".format(player))
-    # print("AnyLegaMove board: {0}".format(print_board(board)))
     return any(is_legal(sq, player, board) for sq in squares())
 
 # Putting it all together
@@ -172,7 +171,6 @@ def play(black_strategy, white_strategy):
     print(print_board(board))
     print("next player: {0}".format(next_player(board, current_player)))
     while next_player(board, current_player):
-        # print("while")
         current_player = next_player(board, current_player)
         if current_player == WHITE:
             move = get_move(white_strategy, current_player, board)
@@ -200,71 +198,99 @@ def next_player(board, prev_player):
     if any_legal_move(next, board):
         return next
     else:
-        print("no more moves left for player {0}".format(next))
         return None
 
 def get_move(strategy, player, board):
     return strategy(player, board)
-    # call strategy(player, board) to get a move
 
 def score(player, board):
     # compute player's score (number of player's pieces minus opponent's)
     score = 0
     for i in squares():
-        if(board[i] == player):
+        if board[i] == player:
             score += 1
     return score
 
-def get_all_nodes_for_player(board, player):
-    nodes = []
-    coordinates = 0
-    print(print_board(board))
-    for node in board:
-        coordinates +=1
-        if node == player:
-            print("Node: {0}".format(node))
-            print("Player: {0}".format(player))
-            nodes.append(board[coordinates])
-    print(nodes)
-    return nodes
-
 def negamax(board, player, depth, alpha, beta):
     if depth == MAX_DEPTH or is_final_state(board):
-        print("getallnodes : {0}".format(len(get_all_nodes_for_player(board, player))))
-        # return value
-        # hier moeten we een value returnen waar de recursive negamax op checkt. 
+        p = parity(player, board)
+        c = corner(player,board)
+        m = mobility(player, board)
+        # print("parity : {0} - corner : {1} - mobiity : {2} - Total value : {3}".format(p,c,m, (p+c+m)))
+        return p + c + m
 
     child_nodes = legal_moves(player, board)
     if len(child_nodes) == 0:
-        child_nodes = set([None])
+        child_nodes = set([None]) #passen als er geen move is
 
     value = -1000
     for move in child_nodes:
         value = max(value, -negamax(make_move(move, player, board), opponent(player), depth +1, -beta, -alpha))
         alpha = max(alpha, value)
-        # print("alpha: {0}".format(alpha))
-        # print("beta: {0}".format(beta))
-        if alpha >= beta:
+        if alpha >= beta: #pruning
             break
     return value
 
+def parity(player, board):
+    my_score = score(player, board)
+    opponent_score = score(opponent(player), board)
+    value = 100 * (my_score - opponent_score) / (my_score + opponent_score)
+    return value
+
+def mobility(player, board):
+    my_move_count = len(legal_moves(player, board))
+    opponent_move_count = len(legal_moves(opponent(player), board))
+    if my_move_count + opponent_move_count != 0:
+        value = 100 * (my_move_count - opponent_move_count) / (my_move_count + opponent_move_count)
+    else:
+        value = 0
+    return value
+
+def corner(player, board):
+    corners = [11, 18, 81, 88]
+    my_corners = 0
+    opponent_corners = 0
+    #deze forloop moet beter kunnen
+    for x in range(len(board)):
+        if board[x] == player and x in corners:
+            my_corners += 1
+        elif board[x] == opponent(player) and x in corners:
+            opponent_corners += 1
+    if my_corners + opponent_corners != 0:
+        value = 100 * (my_corners - opponent_corners) / (my_corners + opponent_corners)
+    else:
+        value = 0
+    return value
+
+
+def best_move(board, player, depth=0):
+    copy_of_board = copy.deepcopy(board)
+    moves = legal_moves(player, copy_of_board)
+    if len(moves) == 0:
+        return None
+    d = {}
+    for move in moves:
+        neg = negamax(make_move(move, player, copy_of_board), opponent(player), depth, -1000, 1000)
+        d[move] = neg
+    print(d)
+    return max(d.items(), key = operator.itemgetter(1))[0]
 
 
 # Play strategies
 def random_strat(player, board):
-    # valid moves ophalen
     moves = legal_moves(player, board)
-    print(moves)
-    move = random.choice(moves)
+    move = random.choice(moves) 
+    print("amount of moves random algo for {1} : {0}".format(moves, player))
     print("chose move : {0}".format(move))
     return move
 
 def algo(player, board):
     moves = legal_moves(player, board)
-    print(moves)
-    move = negamax(board, player, 0, -1000, 1000)
+    start = timeit.default_timer()
+    move = best_move(board, player)
+    stop = timeit.default_timer()
+    print ("time to calculate bestmove = {0}".format(stop - start))
     print("Best move is : {0}".format(move))
     return move
 
-# play(algo, algo)
 play(algo, random_strat)
