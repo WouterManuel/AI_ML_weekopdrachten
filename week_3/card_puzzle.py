@@ -10,7 +10,7 @@ neighbours = {0: [3], 1: [2], 2: [1, 3, 4], 3: [0, 2, 5],
               4: [2, 5], 5: [3, 4, 6, 7], 6: [5], 7: [5]}
 
 # alle mogelijke te spelen kaarten
-cards = ['A', 'A', 'H', 'H', 'D', 'D', 'B', 'B']
+cards = ['A', 'A', 'H', 'H', 'V', 'V', 'B', 'B']
 
 # elke A grenst aan een H
 # elke H grenst aan een D
@@ -20,21 +20,25 @@ cards = ['A', 'A', 'H', 'H', 'D', 'D', 'B', 'B']
 
 # for loop
 def is_valid(k_board):
-    for key in k_board.keys():
-        card_value = k_board[key]
-        list_neighbours= [x for x in neighbours[key]]
-        neighbour_values = [k_board[v] for v in list_neighbours]
+    # for position on board
+    for position in k_board.keys():
+        # if position isnt empty, validate neighbours
+        card_value = k_board[position]
+        # if string is not empty
+        if not not card_value:
+            # list_neighbours= [x for x in neighbours[key]]
+            neighbour_values = [k_board[v] for v in neighbours[position]]
 
-        if card_value in neighbour_values: 
-            return False
-        elif card_value == 'A' and 'H' not in neighbour_values:
-            return False
-        elif card_value == 'H' and 'D' not in neighbour_values:
-            return False
-        elif card_value == 'D' and 'B' not in neighbour_values:
-            return False 
-        elif card_value == 'A' and 'D' in neighbour_values:
-            return False
+            if card_value in neighbour_values: 
+                return False
+            elif (card_value == 'A' and 'H' not in neighbour_values): # or (card_value == 'H' and 'A' not in neighbour_values):
+                 return False
+            elif card_value == 'H' and 'V' not in neighbour_values:  # or (card_value == 'V' and 'H' not in neighbour_values):
+                 return False
+            elif card_value == 'V' and 'B' not in neighbour_values:  # or (card_value == 'B' and 'V' not in neighbour_values):
+                 return False
+            elif card_value == 'A' and 'V' in neighbour_values: # or (card_value == 'V' and 'A' not in neighbour_values):
+                 return False
 
     return True
 
@@ -55,23 +59,33 @@ for permutation in list(itertools.permutations(cards)):
         print('number of iterations: {}'.format(iteration))
         break
 
+calls = 1
+def dfs_and_backtracking(temp_board, deck):
+    global calls
+    if is_valid(temp_board): 
+        # base case where either board is full, or there no more available cards
+        if '' not in list(temp_board.values()) or not deck:
+            print_board(list(temp_board.values()))
+            return True
 
-def dfs(temp_board, available_cards, k):
-    # base case 
-    if not available_cards or k > len(temp_board):
-        print_board(list(temp_board.values()))
-        return list(temp_board)
-    
-    temp_board[k] = available_cards[0]
+        # assign a card of possible cards to index k and list all neighbours of card that are empty
+        # position_neighbours = neighbours[k]
+        possible_keys = [k for k in temp_board.keys() if temp_board[k] == '']
+        
+        for key in possible_keys:
+            # place card down on position based on current deck 
+            # and remove it from the deck
+            for card in deck: 
+                temp_board[key] = card
+                updated_deck = deck.copy()
+                updated_deck.remove(card)
+                # add card to the puzzle and go step further in DFS
+                calls += 1
+                if dfs_and_backtracking(temp_board.copy(), updated_deck.copy()):
+                    return True
+            temp_board[key] = ''
+    return False
 
-    for i in range(len(available_cards[1:])):
-        temp_board[k+1] = available_cards[i]
-        print('current board: {0}'.format(list(temp_board.values())))
-        if is_valid(temp_board):
-            print('board is valid')
-            del available_cards[0]
-            del available_cards[i]
-            dfs(temp_board, available_cards, k+2)
 
-
-dfs(board.copy(), cards.copy(), 0)
+dfs_and_backtracking(board.copy(), cards.copy())
+print('recursive calls: {}:'.format(calls))
