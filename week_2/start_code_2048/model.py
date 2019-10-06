@@ -157,17 +157,11 @@ def get_random_move():
 
 def expectimax(b, turn, depth=0):
     alpha = 0
-    
-    if game_state(b) == 'win':
-        return 999999
 
     # base case: return heuristic value of node
     if depth == MAX_DEPTH:
-        alpha += (max_value(b) + upper_left(b)) * empty_spaces(b)  
+        alpha += (upper_left(b) + smoothness(b))*math.sqrt(empty_spaces(b))
         return alpha
-
-    if not move_exists(b):
-        return 0
 
     if turn == True:
         for move in MERGE_FUNCTIONS.keys():
@@ -187,7 +181,7 @@ def expectimax(b, turn, depth=0):
             b2[i][j] = 4
             
             # for the newly made boards sum up the scores of them, taking their expectancy into account
-            alpha += (.9 * expectimax(b1, True, depth + 1) / len(zeros)) + (.1 * expectimax(b2, True, depth + 1) / len(zeros))
+            alpha += math.floor((.9 * expectimax(b1, True, depth + 1) / len(zeros)) + (.1 * expectimax(b2, True, depth + 1) / len(zeros)))
         
         return alpha # return calculated average
 
@@ -203,10 +197,10 @@ def get_expectimax_move(b):
 
 # heuristic to give the upper left corner the highest priority
 def upper_left(b):
-    weight =    [   [0.4, 0.4, 0.2, 0.099937],
-                    [0.4, 0.4, 0.076711, 0.0724143],
-                    [0.2, 0.0562579, 0.037116, 0.0161889],
-                    [0.0125498, 0.00992495, 0.00575871, 0.00335193]]
+    weight =    [   [2048, 256, 16, 1],
+                    [512, 128, 1, 1],
+                    [256, 4, 1, 1],
+                    [64, 2, 1, 1]]
 
     total_value = 0
     for x in range(4):
@@ -217,11 +211,11 @@ def upper_left(b):
 
 # heuristic to give the upper left corner the highest priority for biggest value on board
 def empty_spaces(b):
-    number_of_empty_spaces = 0
+    number_of_empty_spaces = 1
     for x in range(4):
         for y in range(4): 
             if b[x][y] == 0:
-                number_of_empty_spaces += 1
+                number_of_empty_spaces = number_of_empty_spaces * 2
     return number_of_empty_spaces
 
 # heuristic to give boards with highest numbers on boards the biggest priority
@@ -230,7 +224,30 @@ def max_value(b):
     for x in range(4):
         for y in range(4): 
             if b[x][y] > max_value:
-                # if b[x][y] == max_value:
-                #     max_value += b[x][y]
                 max_value = b[x][y]
     return max_value
+
+def smoothness(b):
+    smoothness_score = 1
+    for x in range(4):
+        for y in range(4): 
+            if b[x][y] != 0:
+                if x != 3:
+                    if y != 3:
+                        if b[x][y] == b[x][y+1]:
+                            smoothness_score += 2
+                        if b[x][y] == b[x+1][y]:
+                            smoothness_score += 2
+                        if b[x][y] == b[x+1][y+1]:
+                            smoothness_score += 2
+                    if y == 3:
+                        if b[x][y] == b[x+1][y]:
+                            smoothness_score += 2
+                if x == 3:
+                    if y == 0:
+                        if b[x][y] == b[x][y+1]:
+                            smoothness_score += 2
+                    if y == 3:
+                        if b[x][y] == b[x-1][y]:
+                            smoothness_score += 2 
+    return smoothness_score

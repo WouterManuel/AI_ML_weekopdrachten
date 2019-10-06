@@ -59,7 +59,7 @@ class MainApp(tk.Frame):
         if model.move_exists(self.board):
             self.board = model.play_move(self.board, direction)
             self.update_grid_cells()           # redraw grid
-            self.root.after(100, self.do_move)  # reschedule do_move in 0.1 second
+            self.root.after(10, self.do_move)  # reschedule do_move in 0.1 second
         else:
             # game over, no reschedule
             if model.game_state(self.board) == 'win':
