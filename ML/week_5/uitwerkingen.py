@@ -110,36 +110,40 @@ def nnCheckGradients(Theta1, Theta2, X, y):
     # Zie het stappenplan in de opgaven voor een mogelijke uitwerking.
     Delta2 = np.zeros(Theta1.shape)
     Delta3 = np.zeros(Theta2.shape)
-    print(Delta2.shape)
-    print(Delta3.shape)
 
     m, n = X.shape
     y_vec = get_y_matrix(y, m)
-    pred = predictNumber(Theta1, Theta2, X)
-    
-    Delta4 = pred - y_vec
 
     for k in range(m): 
-        curr = X[k].reshape(400, 1)
-        a1 = np.c_[np.ones(len(curr.T)), curr.T]
-        z2 = np.dot(a1, Theta1.T)
-        print(z2.shape)
+        a1 = np.c_[1, [X[k, :]]].T
+        # print('a1 shape: ', a1.shape)
+        z2 = np.dot(Theta1, a1)
+        # print('z2 shape: ', z2.shape)
         a2 = sigmoid(z2)
-        # a2 = np.c_[np.ones(len(a2)), a2]
-        z3 = np.dot(a2, Theta2.T)
-        print(z3.shape)
+        # print('a2 shape: ', a2.shape)
+        a2 = np.c_[1, a2.T]
+        # print('a2 ones shape: ', a2.shape)
+        z3 = np.dot(Theta2, a2.T)
+        # print('z3 shape: ', z3.shape)
+        a3 = sigmoid(z3.T)
+        # print('a3 shape: ', a3.shape)
 
-        delta_4 = Delta4[k].reshape(10,1)
-        # delta_4 = np.c_[np.ones(len(delta_4.T)), delta_4.T]
+        # np.vstack([ [1] , a2])
+
+        delta_3 = a3 - y_vec[k, :]
         
-        delta_3 = (np.dot(Theta2.T, delta_4)) * sigmoidGradient(z3)
-        print(delta_3.shape)
-        # theta_1 = np.c_[np.ones(len(Theta1.T)), Theta1.T]
+        # print('delta 3: ', delta_3.shape)
 
-        delta_2 = (np.dot(Theta1.T, delta_3)) * sigmoidGradient(z2)
+        z2_k_ones = np.c_[1, z2.T].T
+        # print('z2 ones: ', z2_k_ones.shape)
 
-        Delta3 += delta_3
-        Delta2 += delta_2 
+        delta_2 = (np.dot(Theta2.T, delta_3.T)) * sigmoidGradient(z2_k_ones)
+        delta_2 = delta_2[1:, :]
+        # print('delta 2: ', delta_2.shape)
+        
+        # print('a2 k: ', a2.shape)
+        Delta3 += np.dot(delta_3.T, a2)
+        Delta2 += np.dot(delta_2, a1.T)
 
     Delta2_grad = Delta2 / m
     Delta3_grad = Delta3 / m

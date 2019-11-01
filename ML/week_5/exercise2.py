@@ -61,7 +61,7 @@ num_labels = 10;          # 10 labels, from 1 to 10
                           # (note that we have mapped "0" to label 10)
 
 
-# ========================  OPGAVE 1 ======================== 
+# # ========================  OPGAVE 1 ======================== 
 # rnd = randint(0, X.shape[0])
 # print ("Tekenen van data op regel {}".format(rnd))
 # if (len(sys.argv)>1 and sys.argv[1]=='skip') :
@@ -74,8 +74,7 @@ num_labels = 10;          # 10 labels, from 1 to 10
 
 # input ("Druk op Return om verder te gaan...") 
 
-
-# ========================  OPGAVE 2a ======================== 
+# # ========================  OPGAVE 2a ======================== 
 # print ("")
 # print ("Sigmoid-functie met een relatief groot negatief getal zou bijna 0 moeten zijn")
 # print ("Sigmoid van -10 = {}".format(sigmoid(-10)))
@@ -93,14 +92,14 @@ num_labels = 10;          # 10 labels, from 1 to 10
 
 # input ("Druk op Return om verder te gaan...") 
 
-# ========================  OPGAVE 2b ======================== 
-print ("")
-print ("Aanroepen van de methode predictNumber met de y-vector")
-print ("en het weergeven van de dimensionaliteit van het resultaat")
-matr = get_y_matrix(y, m)
-print (matr.shape)
-print ("Dit zou (5000,10) moeten zijn.")
-input ("Druk op Return om verder te gaan.")
+# # ========================  OPGAVE 2b ======================== 
+# print ("")
+# print ("Aanroepen van de methode predictNumber met de y-vector")
+# print ("en het weergeven van de dimensionaliteit van het resultaat")
+# matr = get_y_matrix(y, m)
+# print (matr.shape)
+# print ("Dit zou (5000,10) moeten zijn.")
+# input ("Druk op Return om verder te gaan.")
 
 
 # ========================  OPGAVE 2c ======================== 
