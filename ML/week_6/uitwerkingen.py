@@ -71,9 +71,9 @@ def confEls(conf, labels):
 
     for i in range(len(labels)):
         tp_i = tp[i]
-        fp_i = sum(conf[:, i].numpy() - tp_i)
-        fn_i = sum(conf[i, :].numpy() - tp_i)
-        tn_i = sum(sum(conf.numpy() -  tp_i - fp_i - fn_i))
+        fp_i = sum(conf[:, i].numpy()) - tp_i
+        fn_i = sum(conf[i, :].numpy()) - tp_i
+        tn_i = sum(sum(conf[:, :].numpy())) -  tp_i - fp_i - fn_i
 
         resultList.append((labels[i], tp_i, fp_i, fn_i, tn_i))
     
@@ -92,8 +92,6 @@ def confData(metrics):
     fp = sum([n[2] for n in metrics])
     fn = sum([n[3] for n in metrics])
     tn = sum([n[4] for n in metrics])
-
-    print(tp, fp, fn, tn)
 
     # BEREKEN HIERONDER DE JUISTE METRIEKEN EN RETOURNEER DIE 
     # ALS EEN DICTIONARY
